@@ -10,11 +10,11 @@ import retrofit2.Response
 
 fun <T> toResultFlow(call: suspend () -> Response<T>?): Flow<ApiResult<T>?> {
     return flow {
-        emit(ApiResult.Loading())
+        emit(ApiResult.Loading)
 
-        val c = call()
-        c?.let {
-            try {
+        try {
+            val c = call()
+            c?.let {
                 if (c.isSuccessful) {
                     emit(ApiResult.Success(c.body()))
                 } else {
@@ -24,9 +24,9 @@ fun <T> toResultFlow(call: suspend () -> Response<T>?): Flow<ApiResult<T>?> {
                         emit(ApiResult.Error(error))
                     }
                 }
-            } catch (e: Exception) {
-                emit(ApiResult.Error(e.toString()))
             }
+        } catch (e: Exception) {
+            emit(ApiResult.Error(e.toString()))
         }
 
     }.flowOn(Dispatchers.IO)

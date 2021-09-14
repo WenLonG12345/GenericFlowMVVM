@@ -1,12 +1,12 @@
 package com.example.genericflowmvvm
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.genericflowmvvm.databinding.ActivityMainBinding
-import com.example.genericflowmvvm.model.ApiStatus.*
+import com.example.genericflowmvvm.model.ApiResult
 import com.example.genericflowmvvm.model.showToast
 import com.example.genericflowmvvm.ui.MovieAdapter
 import com.example.genericflowmvvm.ui.MovieViewModel
@@ -30,14 +30,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         viewModel.getUpcomingMovies().observe(this, { result ->
-            binding.progressBar.isVisible = result?.status == LOADING
-            when(result?.status) {
-                SUCCESS -> {
+            binding.progressBar.isVisible = result is ApiResult.Loading
+            when(result) {
+                is ApiResult.Error -> result.message.showToast(this)
+                ApiResult.Loading -> Unit
+                is ApiResult.Success -> {
                     binding.tvEmptySearch.isVisible = result.data == null || result.data.results.isEmpty()
                     movieAdapter.submitList(result.data?.results)
                 }
-                ERROR -> result.message?.showToast(this)
-                LOADING -> Unit
             }
         })
     }
